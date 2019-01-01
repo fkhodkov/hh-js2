@@ -1,4 +1,4 @@
-import { machine, useContext, useState } from 'my-state-machine'
+import { machine, useContext, useState } from './MyStateMachine.js'
 
 // machine — создает инстанс state machine (фабрика)
 const vacancyMachine = machine({
@@ -7,7 +7,7 @@ const vacancyMachine = machine({
   // начальное состояние
   initialState: 'notResponded',
   // дополнительный контекст (payload)
-  context: {id: 123}
+  context: {id: 123},
   // Граф состояний и переходов между ними
   states: {
     // Каждое поле — это возможное состоение
@@ -27,7 +27,7 @@ const vacancyMachine = machine({
           // упрощенный сервис, вызываем при транзакции
 	  service: (event) => {
             // Позволяет получить текущий контекст и изменить его
-	    const [contex, setContext] = useContext()			
+	    const [context, setContext] = useContext()
             // Позволяет получить текущий стейт и изменить его
             const [state, setState] = useState();
             // Поддерживаются асинхронные действия
@@ -46,7 +46,7 @@ const vacancyMachine = machine({
   },
   // Раздел описание экшенов 
   actions: {
-    onStateEntry: (event) {
+    onStateEntry: (event) => {
       const [state] = useState();
       console.log('now state is ' + state);
     },
