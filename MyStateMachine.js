@@ -6,6 +6,12 @@ function withEnv(env, func, ...args) {
   envStack.pop()
 }
 
+function getEnv(f) {
+  if (envStack.length === 0)
+    throw new Error(`${f.name} should be run only from state machine`)
+  return envStack[envStack.length-1]
+}
+
 const machine = factory => ({
   context: factory.context,
   stateId: factory.initialState,
@@ -27,9 +33,7 @@ const machine = factory => ({
 })
 
 function useContext () {
-  if (envStack.length === 0)
-    throw new Error("useContext should be run only from state machine")
-  const {machine} = envStack[envStack.length-1]
+  const {machine} = getEnv(useContext)
   return [
     machine.context,
     arg => { Object.assign(machine.context, arg) }
@@ -37,9 +41,7 @@ function useContext () {
 }
 
 function useState () {
-  if (envStack.length === 0)
-    throw new Error("useState should be run only from state machine")
-  const {machine, event} = envStack[envStack.length-1]
+  const {machine, event} = getEnv(useState)
   const currentState = machine.getState()
   return [
     machine.stateId,
