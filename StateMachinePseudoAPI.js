@@ -13,7 +13,7 @@ const vacancyMachine = machine({
     // Каждое поле — это возможное состоение
     responded: {
       // action, который нужно выполнить при входе в это состояние. Можно задавать массивом, строкой или функцией
-      onEntry: 'onStateEntry'
+      onEntry: ['onStateEntry', 'makeResponse']
     },
     notResponded: {
       // action, который нужно выполнить при выходе из этого состояния. Можно задавать массивом, строкой или функцией                         
@@ -50,11 +50,11 @@ const vacancyMachine = machine({
       const [state] = useState();
       console.log('now state is ' + state);
     },
-    /*makeResponse: (event) => {
-    // both sync and async actions
-    const [contex, setContext] = useContext()			
-    window.fetch({method: 'post', data: {resume: event.resume, vacancyId: context.id} })
-    }*/
+    makeResponse: (event) => {
+      // both sync and async actions
+      const [context, setContext] = useContext()
+      window.fetch({method: 'post', data: {resume: event.resume, vacancyId: context.id} })
+    }
   }
 })
 
