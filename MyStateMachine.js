@@ -12,26 +12,6 @@ function getEnv(f) {
   return envStack[envStack.length-1]
 }
 
-const machine = factory => ({
-  context: factory.context,
-  stateId: factory.initialState,
-  getAction(action) { return factory.actions[action] },
-  getState() { return factory.states[this.stateId] },
-  transition(action, event) {
-    const currentState = this.getState()
-    const response = currentState.on[action]
-    if (response.service) {
-      withEnv({machine: this, event: event}, response.service, event)
-    } else if (response.target) {
-      withEnv({machine: this, event: event}, () => {
-        const [state, setState] = useState()
-        if (state !== response.target)
-          setState(response.target)
-      })
-    }
-  },
-})
-
 function useContext () {
   const {machine} = getEnv(useContext)
   return [
@@ -59,7 +39,7 @@ function useState () {
       if (arg !== machine.stateId) {
         withEnv({machine: machine, event: event}, () => {
           runHooks(currentState.onExit)
-          machine.stateId = arg
+          machine.setState(arg)
           const newState = machine.getState()
           runHooks(newState.onEntry)
         })
@@ -67,5 +47,31 @@ function useState () {
     }
   ]
 }
+
+const machine = factory => ({
+  context: factory.context,
+  stateId: factory.initialState,
+  getAction(action) { return factory.actions[action] },
+  getState() { return factory.states[this.stateId] },
+  setState(newStateId) {
+    if (factory.states[newStateId])
+      this.stateId = newStateId
+    else
+      throw new Error(`State ${newStateId} doesn't exist`)
+  },
+  transition(action, event) {
+    const currentState = this.getState()
+    const response = currentState.on[action]
+    if (response.service) {
+      withEnv({machine: this, event: event}, response.service, event)
+    } else if (response.target) {
+      withEnv({machine: this, event: event}, () => {
+        const [state, setState] = useState()
+        if (state !== response.target)
+          setState(response.target)
+      })
+    }
+  },
+})
 
 export { machine, useContext, useState }

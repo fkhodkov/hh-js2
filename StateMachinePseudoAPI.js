@@ -58,5 +58,27 @@ const vacancyMachine = machine({
   }
 })
 
+const faultyVacancyMachine = machine({
+  initialState: 'start',
+  context: {},
+  states: {
+    start: {
+      onExit() {
+        console.log("We're leaving start state")
+      },
+      on: {
+        ERROR: {
+          target: 'noSuchState'
+        }
+      }
+    }
+  }
+})
+
 // Пример использования StateMachine
 vacancyMachine.transition('RESPOND', {resume: {name: 'Vasya', lastName: 'Pupkin'}});
+try {
+  faultyVacancyMachine.transition('ERROR')
+} catch (e) {
+  console.log(`Great, we have expected error: ${e}`)
+}
